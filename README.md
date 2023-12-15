@@ -19,6 +19,8 @@ learning and SVD, and the potential of SGCLDGA in discovering new drug-gene asso
 - scikit-learn 1.0.2
 - scipy 1.7.3
 
+# Data
+The Drug-Gene Interaction Database 4.0(DGIdb4.0)is a user-friendly search tool and comprehensive database that provides information on gene-drug associations between known or potential drugs. Currently, DGIdb 4.0 has 10,606 druggable genes and 54,591 drug-gene interactions, covering 41,102 genes and 14,449 drugs. We selected 46,892 known drug-gene associations from DGIdb 4.0 as experimental data, covering 10,690 drugs and 3,227 genes. 
 # Run the demo
 ```
 python main.py
