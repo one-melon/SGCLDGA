@@ -6,29 +6,6 @@ from sklearn.metrics import roc_auc_score,roc_curve,auc,precision_recall_curve
 import random
 
 
-def metrics(uids, predictions, topk, test_labels):
-    user_num = 0
-    all_recall = 0
-    all_ndcg = 0
-    for i in range(len(uids)):
-        uid = uids[i]
-        prediction = list(predictions[i][:topk])
-        label = test_labels[uid]
-        if len(label) > 0:
-            hit = 0
-            idcg = np.sum([np.reciprocal(np.log2(loc + 2)) for loc in range(min(topk, len(label)))])
-            dcg = 0
-            for item in label:
-                if item in prediction:
-                    hit += 1
-                    loc = prediction.index(item)
-                    dcg = dcg + np.reciprocal(np.log2(loc + 2))
-            all_recall = all_recall + hit / len(label)
-            all_ndcg = all_ndcg + dcg / idcg
-            user_num += 1
-    return all_recall / user_num, all_ndcg / user_num
-
-
 def mm_auc(uids, pred_score, test_labels, train_labels, y_pred, y_true):
     for i in range(len(uids)):
         uid = uids[i]
@@ -47,98 +24,6 @@ def mm_auc(uids, pred_score, test_labels, train_labels, y_pred, y_true):
             y_pred.append(item_scores[item])
     return y_pred, y_true
 
-
-def evalRanking_valid(self, dataset):
-    predict_list = []
-    actual_list = []
-    # path1 = "./dataset/lncRNA_drug_not_Mutation_p-value_0.05/ass.txt"
-    path1 = "./dataset/drug_disease/ass.txt"
-    ass = {}
-
-    with open(path1, 'r') as f:
-        for line in f.readlines():
-            line = line.strip().split()
-            line[0], line[1] = int(line[0]), int(line[1])
-            # if line[0] == 0 or line[1] == 0:
-            # print(f'0!!!!!!')
-            if line[0] not in ass.keys():
-                ass[line[0]] = []
-            ass[line[0]].append(int(line[1]))
-
-    negative_dict = {}
-    for key in dataset:
-        # if key not in self.user
-        lg = len(dataset[key])
-        all_i = set(ass[key])
-        cu_i = set([i for i in range(self.data.item_num)])
-        need_i = list(cu_i - all_i)
-        random.shuffle(need_i)
-        need_i = need_i[:lg]
-        negative_dict[key] = need_i
-    # print(negative_dict)
-
-    # 保存分数用的
-    miRNA = []
-    drug = []
-
-    # for user in ass2.keys():
-    for _, user in enumerate(dataset):
-        itemSet = {}
-        # print(f'user: {user}')
-        predictedItems = self.predict(user)
-        rated_list, li = self.data.user_rated(user)
-        for item in rated_list:
-            predictedItems[self.data.item[item]] = -10e8
-        # if predictedItems == pd.NA:
-        #     continue
-        # print(f'predictedItems: {predictedItems}')
-        # result_score.append(predictedItems)
-        for id, rating in enumerate(predictedItems):
-            # print(f'id: {id}; rating: {rating}')
-            itemSet[self.data.id2item[id]] = rating
-
-        for i in dataset[user]:
-            miRNA.append(user)
-            drug.append(i)
-            if i in itemSet:
-                va = itemSet[i]
-                actual_list.append(1)
-                predict_list.append(va)
-            else:
-                actual_list.append(1)
-                # predict_list.append(sum(itemSet.values())/len(itemSet.keys()))
-                predict_list.append(1)
-
-        for i in negative_dict[user]:
-            miRNA.append(user)
-            drug.append(i)
-            # i = str(i)
-            if i in itemSet:
-                va = itemSet[i]
-                actual_list.append(0)
-                predict_list.append(va)
-            else:
-                actual_list.append(0)
-                # predict_list.append(sum(itemSet.values()) / len(itemSet.keys()))
-                predict_list.append(0)
-
-    # 评价指标
-    # print(f'actual_list: {actual_list}\n'
-    #       f'predict_list: {predict_list}')
-    fpr, tpr, _ = roc_curve(actual_list, predict_list)
-    # np.save("fpr.npy", fpr)
-    # np.save("tpr.npy", tpr)
-    auroc = auc(fpr, tpr)
-
-    precision, recall, _ = precision_recall_curve(actual_list, predict_list)
-    # np.save("precision.npy", precision)
-    # np.save("recall.npy", recall)
-    aupr = auc(recall, precision)
-    if dataset == self.data.test_set:
-        print(f"test_set: auc: {auroc}; aupr: {aupr}")
-    else:
-        print(f'valid_set: auc: {auroc}; aupr: {aupr}')
-    return auroc, aupr, fpr, tpr, precision, recall
 
 def GIP_kernel (Asso_RNA_Dis):
     # the number of row
