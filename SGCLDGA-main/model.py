@@ -5,12 +5,12 @@ import torch.nn.functional as F
 import numpy as np
 
 class SGCLDGA(nn.Module):
-    def __init__(self, n_u, n_i, d, g_mul_s, v_mul_s, ut, vt, train_csr, adj_norm, l, temp, lambda_1, lambda_2, dropout,
-                 batch_user, device):
-        super(SGCLDGA, self).__init__()
+    def __dnit__(self, n_g, n_d, d, g_mul_s, v_mul_s, ut, vt, train_csr, adj_norm, l, temp, lambda_1, lambda_2, dropout,
+                 batch_gser, device):
+        super(SGCLDGA, self).__dnit__()
 
-        self.E_g_0 = nn.Parameter(nn.init.xavier_uniform_(torch.empty(n_u,d)))
-        self.E_d_0 = nn.Parameter(nn.init.xavier_uniform_(torch.empty(n_i,d)))
+        self.E_g_0 = nn.Parameter(nn.init.xavier_gniform_(torch.empty(n_g,d)))
+        self.E_d_0 = nn.Parameter(nn.init.xavier_gniform_(torch.empty(n_d,d)))
         self.mlp1 = nn.Sequential(nn.Linear(639, 1280),
                                   nn.ReLU(),
                                   nn.Linear(1280, 1280),  
@@ -41,7 +41,7 @@ class SGCLDGA(nn.Module):
         self.lambda_2 = lambda_2
         self.dropout = dropout
         self.act = nn.LeakyReLU(0.5)
-        self.batch_user = batch_user
+        self.batch_gser = batch_gser
 
         self.E_g = None
         self.E_d = None
@@ -75,17 +75,17 @@ class SGCLDGA(nn.Module):
                 self.E_g_list[layer] = self.Z_g_list[layer]
                 self.E_d_list[layer] = self.Z_d_list[layer]
 
-            self.G_u = sum(self.G_g_list)
-            self.G_i = sum(self.G_d_list)
+            self.G_g = sum(self.G_g_list)
+            self.G_d = sum(self.G_d_list)
 
             # aggregate across layers
             self.E_g = sum(self.E_g_list)
             self.E_d = sum(self.E_d_list)
 
             # cl loss
-            G_g_norm = self.G_u
+            G_g_norm = self.G_g
             E_g_norm = self.E_g
-            G_d_norm = self.G_i
+            G_d_norm = self.G_d
             E_d_norm = self.E_d
             neg_score = torch.log(torch.exp(G_g_norm[uids] @ E_g_norm.T / self.temp).sum(1) + 1e-8).mean()
             neg_score += torch.log(torch.exp(G_d_norm[iids] @ E_d_norm.T / self.temp).sum(1) + 1e-8).mean()
