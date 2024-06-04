@@ -5,26 +5,6 @@ import torch.utils.data as data
 from sklearn.metrics import roc_auc_score,roc_curve,auc,precision_recall_curve
 import random
 
-
-def mm_auc(uids, pred_score, test_labels, train_labels, y_pred, y_true):
-    for i in range(len(uids)):
-        uid = uids[i]
-        item_scores = pred_score[i]
-        pos = test_labels[uid]
-        train_item_ass = train_labels[uid]
-        train_test_ass = pos + train_item_ass
-        diff = list(set(range(len(item_scores))) - set(train_test_ass))
-        random.shuffle(diff)
-        neg = diff[0:len(pos)]
-        y_true += [1] * len(pos)
-        y_true += [0] * len(pos)
-        for item in pos:
-            y_pred.append(item_scores[item])
-        for item in neg:
-            y_pred.append(item_scores[item])
-    return y_pred, y_true
-
-
 def GIP_kernel (Asso_RNA_Dis):
     # the number of row
     nc = Asso_RNA_Dis.shape[0]
